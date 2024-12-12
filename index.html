@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tom's Website</title>
+    <title>Tom's Website with Dictionary Search</title>
     <!-- Include PyScript for Python -->
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
@@ -50,6 +50,19 @@
             bottom: 0;
             width: 100%;
         }
+        #dictionary {
+            margin-top: 30px;
+        }
+        #output {
+            white-space: pre-wrap;
+            text-align: left;
+            margin-top: 20px;
+            background-color: #e9e9e9;
+            padding: 15px;
+            border-radius: 5px;
+            width: 80%;
+            margin-left: 10%;
+        }
     </style>
 </head>
 <body>
@@ -58,20 +71,18 @@
         <p>Your go-to place for awesome content.</p>
     </header>
 
-    <!-- Navigation Bar -->
     <nav>
         <a href="#about">About</a>
         <a href="#services">Services</a>
         <a href="#contact">Contact</a>
     </nav>
 
-    <!-- Main Content -->
     <main>
         <section id="about">
             <h2>About Me</h2>
             <p>Hi! I'm Tom, a passionate developer who loves creating amazing websites and applications.</p>
         </section>
-        
+
         <section id="services">
             <h2>What I Offer</h2>
             <p>I'm a very cool guy.</p>
@@ -85,12 +96,11 @@
         <section id="dictionary">
             <h2>Dictionary Search</h2>
             <input type="text" id="word" placeholder="Enter a word">
-            <button onclick="search()">Search</button>
+            <button id="searchButton">Search</button>
             <pre id="output"></pre>
         </section>
     </main>
 
-    <!-- Footer -->
     <footer>
         <p>&copy; 2024 Tom's Website. All Rights Reserved.</p>
     </footer>
@@ -101,14 +111,21 @@ import requests
 
 URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 
+# Search function to handle the dictionary lookup
 def search():
-    word = Element("word").value  # Get the input value
+    word = Element("word").value  # Get the word entered by the user
     output = Element("output")  # Reference the output element
+    
+    if not word:
+        output.write("Please enter a word to search.\n")
+        return
 
     try:
         response = requests.get(URL + word)
+        
+        # Check for 404 status (word not found)
         if response.status_code == 404:
-            output.write(f"{word} is not valid.")
+            output.write(f"{word} is not a valid word.\n")
             return
 
         content = response.json()
@@ -132,7 +149,9 @@ def search():
         output.write(result)
     except Exception as e:
         output.write(f"An error occurred: {e}")
+
+# Attach search function to button click
+Element("searchButton").element.onclick = search
     </py-script>
 </body>
 </html>
-
