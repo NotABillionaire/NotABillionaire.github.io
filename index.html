@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,7 +33,7 @@ def search():
     try:
         # Make an API call to fetch the word details
         response = requests.get(URL + word)
-        
+
         # Log the response status code for debugging
         print(f"API Response Status Code: {response.status_code}")
 
@@ -69,7 +68,7 @@ def search():
                 definitions = meaning.get("definitions", [])
                 synonyms = ", ".join(meaning.get("synonyms", []))
                 antonyms = ", ".join(meaning.get("antonyms", []))
-                
+
                 result += f"{part_of_speech}: \n"
                 for definition in definitions:
                     result += f"  - Definition: {definition['definition']}\n"
@@ -93,21 +92,4 @@ Element("search-btn").element.addEventListener("click", search)
     </py-script>
 </body>
 </html>
-      for definition in definitions:
-                    result += f"  - Definition: {definition['definition']}\n"
-                if synonyms:
-                    result += f"  - Synonyms: {synonyms}\n"
-                if antonyms:
-                    result += f"  - Antonyms: {antonyms}\n\n"
-        else:
-            result += f"No meanings found for '{word}'.\n"
 
-        output.write(result)  # Display the results in the output element
-
-    except Exception as e:
-        output.write(f"An error occurred: {e}\n")
-        print(f"Error: {e}")
-
-    </py-script>
-</body>
-</html>
