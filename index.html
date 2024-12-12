@@ -77,3 +77,63 @@
     </footer>
 </body>
 </html>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictionary Search</title>
+    <!-- Include PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+</head>
+<body>
+    <h1>Dictionary Search</h1>
+    <input type="text" id="word" placeholder="Enter a word">
+    <button onclick="search()">Search</button>
+    <pre id="output"></pre>
+
+    <!-- PyScript Code -->
+    <py-script>
+import requests
+
+URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
+
+def search():
+    word = Element("word").value  # Get the input value
+    output = Element("output")  # Reference the output element
+
+    try:
+        response = requests.get(URL + word)
+        if response.status_code == 404:
+            output.write(f"{word} is not valid.")
+            return
+
+        content = response.json()
+        contents = content[0]
+
+        result = f"Word: {contents['word']}\n"
+        phonetics = contents["phonetics"][0]["audio"]
+        result += f"Audio: {phonetics}\n\n"
+
+        meanings = contents["meanings"]
+        for meaning in meanings:
+            result += f"{meaning['partOfSpeech']}: \n"
+            definitions = meaning["definitions"]
+            for definition in definitions:
+                result += f" - Definition: {definition['definition']}\n"
+            synonyms = ", ".join(meaning["synonyms"])
+            antonyms = ", ".join(meaning["antonyms"])
+            result += f" - Synonyms: {synonyms}\n"
+            result += f" - Antonyms: {antonyms}\n\n"
+
+        output.write(result)
+    except Exception as e:
+        output.write(f"An error occurred: {e}")
+    </py-script>
+</body>
+</html>
+
