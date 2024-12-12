@@ -1,159 +1,90 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tom's Website with Dictionary Search</title>
+    <title>Dictionary Search</title>
     <!-- Include PyScript for Python -->
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-        }
-        nav {
-            display: flex;
-            justify-content: center;
-            background-color: #333;
-            padding: 0.5rem;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin: 0 1rem;
-            padding: 0.5rem;
-        }
-        nav a:hover {
-            background-color: #4CAF50;
-            border-radius: 5px;
-        }
-        main {
-            padding: 2rem;
-            text-align: center;
-        }
-        footer {
-            text-align: center;
-            padding: 1rem;
-            background-color: #333;
-            color: white;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-        #dictionary {
-            margin-top: 30px;
-        }
-        #output {
-            white-space: pre-wrap;
-            text-align: left;
-            margin-top: 20px;
-            background-color: #e9e9e9;
-            padding: 15px;
-            border-radius: 5px;
-            width: 80%;
-            margin-left: 10%;
-        }
-    </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to Tom's Website!</h1>
-        <p>Your go-to place for awesome content.</p>
-    </header>
+    <h1>Dictionary Search</h1>
+    <input type="text" id="word" placeholder="Enter a word">
+    <button onclick="search()">Search</button>
+    <pre id="output"></pre>
 
-    <nav>
-        <a href="#about">About</a>
-        <a href="#services">Services</a>
-        <a href="#contact">Contact</a>
-    </nav>
-
-    <main>
-        <section id="about">
-            <h2>About Me</h2>
-            <p>Hi! I'm Tom, a passionate developer who loves creating amazing websites and applications.</p>
-        </section>
-
-        <section id="services">
-            <h2>What I Offer</h2>
-            <p>I'm a very cool guy.</p>
-        </section>
-
-        <section id="contact">
-            <h2>Probably a Genius</h2>
-        </section>
-
-        <!-- Dictionary Search Section -->
-        <section id="dictionary">
-            <h2>Dictionary Search</h2>
-            <input type="text" id="word" placeholder="Enter a word">
-            <button id="searchButton">Search</button>
-            <pre id="output"></pre>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2024 Tom's Website. All Rights Reserved.</p>
-    </footer>
-
-    <!-- PyScript Code for Dictionary Search -->
+    <!-- PyScript Code -->
     <py-script>
 import requests
 
+# API URL
 URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 
-# Search function to handle the dictionary lookup
+# Search function to fetch the word details
 def search():
     word = Element("word").value  # Get the word entered by the user
     output = Element("output")  # Reference the output element
-    
+
     if not word:
         output.write("Please enter a word to search.\n")
         return
 
     try:
-        response = requests.get(URL + word)
+        response = requests.get(URL + word)  # Make an API call to fetch the word details
         
-        # Check for 404 status (word not found)
-        if response.status_code == 404:
-            output.write(f"{word} is not a valid word.\n")
+        # Log the response status code for debugging
+        print(f"API Response Status Code: {response.status_code}")
+
+        # Check if the response is successful (status code 200)
+        if response.status_code != 200:
+            output.write(f"Error: Unable to fetch data for '{word}' (Status code: {response.status_code}). Please try again.\n")
             return
 
+        # Parse the response JSON
         content = response.json()
-        contents = content[0]
 
-        result = f"Word: {contents['word']}\n"
-        phonetics = contents["phonetics"][0]["audio"]
-        result += f"Audio: {phonetics}\n\n"
+        # Extract word and other details
+        word_data = content[0]  # Assuming API returns a list, we take the first item
 
-        meanings = contents["meanings"]
-        for meaning in meanings:
-            result += f"{meaning['partOfSpeech']}: \n"
-            definitions = meaning["definitions"]
-            for definition in definitions:
-                result += f" - Definition: {definition['definition']}\n"
-            synonyms = ", ".join(meaning["synonyms"])
-            antonyms = ", ".join(meaning["antonyms"])
-            result += f" - Synonyms: {synonyms}\n"
-            result += f" - Antonyms: {antonyms}\n\n"
+        # Prepare the result
+        result = f"Word: {word_data['word']}\n"
+        
+        # Phonetics and Audio (if available)
+        if "phonetics" in word_data:
+            phonetics = word_data["phonetics"]
+            if phonetics:
+                audio = phonetics[0].get("audio", "No audio available.")
+                result += f"Audio: {audio}\n\n"
+            else:
+                result += "No phonetic audio available.\n"
 
-        output.write(result)
+        # Meanings and Definitions
+        meanings = word_data.get("meanings", [])
+        if meanings:
+            for meaning in meanings:
+                part_of_speech = meaning.get("partOfSpeech", "Unknown")
+                definitions = meaning.get("definitions", [])
+                synonyms = ", ".join(meaning.get("synonyms", []))
+                antonyms = ", ".join(meaning.get("antonyms", []))
+                
+                result += f"{part_of_speech}: \n"
+                for definition in definitions:
+                    result += f"  - Definition: {definition['definition']}\n"
+                if synonyms:
+                    result += f"  - Synonyms: {synonyms}\n"
+                if antonyms:
+                    result += f"  - Antonyms: {antonyms}\n\n"
+        else:
+            result += f"No meanings found for '{word}'.\n"
+
+        output.write(result)  # Display the results in the output element
+
     except Exception as e:
-        output.write(f"An error occurred: {e}")
+        output.write(f"An error occurred: {e}\n")
+        print(f"Error: {e}")
 
-# Attach search function to button click
-Element("searchButton").element.onclick = search
     </py-script>
 </body>
 </html>
