@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dictionary Search</title>
-    <!-- Include PyScript for Python -->
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-    <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,75 +12,137 @@
             background-color: #f4f4f9;
             color: #333;
         }
-        h1 {
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
             text-align: center;
         }
+        main {
+            padding: 2rem;
+            text-align: center;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #333;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
         #output {
+            white-space: pre-wrap;
+            text-align: left;
             margin-top: 20px;
+            padding: 20px;
+            background-color: #eee;
+            border-radius: 5px;
+            min-height: 100px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        input {
+            padding: 10px;
+            margin-top: 10px;
+            width: 300px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <h1>Dictionary Search</h1>
-    <input type="text" id="word" placeholder="Enter a word">
-    <button id="search-btn">Search</button>
-    <pre id="output"></pre>
+    <header>
+        <h1>Dictionary Search</h1>
+    </header>
 
-    <!-- PyScript Code -->
-    <py-script>
-def display_result(result):
-    output = Element("output")
-    output.write(result)
-    </py-script>
+    <main>
+        <input type="text" id="word" placeholder="Enter a word">
+        <button id="search-btn">Search</button>
+        <div id="output"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Tom's Website. All Rights Reserved.</p>
+    </footer>
 
     <script>
+        // URL of the dictionary API
         const URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
 
-        document.getElementById("search-btn").addEventListener("click", function () {
-            const word = document.getElementById("word").value.trim();
-            const output = document.getElementById("output");
-            output.textContent = "";  // Clear previous results
-            
+        // Function to handle the search
+        function search() {
+            const word = document.getElementById("word").value;  // Get the entered word
+            const output = document.getElementById("output");    // Get the output div
+
             if (!word) {
-                output.textContent = "Please enter a word.";
+                output.textContent = "Please enter a word to search.";
                 return;
             }
 
+            // Make the API request
             fetch(URL + word)
                 .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error(`Error: ${response.statusText}`);
+                    if (!response.ok) {
+                        output.textContent = `Error: Unable to fetch data for '${word}' (Status code: ${response.status}). Please try again.`;
+                        return;
                     }
+                    return response.json();
                 })
                 .then(data => {
-                    let result = `Word: ${data[0].word}\n`;
+                    const wordData = data[0]; // Assuming API returns a list, we take the first item
+                    let result = `Word: ${wordData.word}\n`;
 
-                    const phonetics = data[0].phonetics;
-                    if (phonetics && phonetics[0].audio) {
-                        result += `Audio: ${phonetics[0].audio}\n`;
+                    // Phonetics and Audio (if available)
+                    const phonetics = wordData.phonetics;
+                    if (phonetics && phonetics[0] && phonetics[0].audio) {
+                        result += `Audio: ${phonetics[0].audio}\n\n`;
                     }
 
-                    const meanings = data[0].meanings;
-                    meanings.forEach(meaning => {
-                        result += `${meaning.partOfSpeech}: \n`;
-                        meaning.definitions.forEach(definition => {
-                            result += `  - Definition: ${definition.definition}\n`;
+                    // Meanings and Definitions
+                    const meanings = wordData.meanings;
+                    if (meanings) {
+                        meanings.forEach(meaning => {
+                            result += `${meaning.partOfSpeech}:\n`;
+
+                            meaning.definitions.forEach(definition => {
+                                result += ` - Definition: ${definition.definition}\n`;
+                            });
+
+                            if (meaning.synonyms.length > 0) {
+                                result += ` - Synonyms: ${meaning.synonyms.join(", ")}\n`;
+                            }
+
+                            if (meaning.antonyms.length > 0) {
+                                result += ` - Antonyms: ${meaning.antonyms.join(", ")}\n`;
+                            }
+                            result += "\n";
                         });
+                    } else {
+                        result += `No meanings found for '${word}'.\n`;
+                    }
 
-                        const synonyms = meaning.synonyms.join(", ");
-                        const antonyms = meaning.antonyms.join(", ");
-                        result += `  - Synonyms: ${synonyms}\n  - Antonyms: ${antonyms}\n\n`;
-                    });
-
-                    // Call the PyScript function to display the result
-                    display_result(result);
+                    // Display the result
+                    output.textContent = result;
                 })
                 .catch(error => {
                     output.textContent = `An error occurred: ${error.message}`;
                 });
-        });
+        }
+
+        // Add event listener to the search button
+        document.getElementById("search-btn").addEventListener("click", search);
     </script>
 </body>
 </html>
