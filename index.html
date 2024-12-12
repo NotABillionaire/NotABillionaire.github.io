@@ -64,7 +64,7 @@
 </head>
 <body>
     <header>
-        <h1>Dictionary Search</h1>
+        <h1>Tom's Website</h1>
     </header>
 
     <main>
@@ -84,7 +84,7 @@
         // Function to handle the search
         function search() {
             const word = document.getElementById("word").value;  // Get the entered word
-            const output = document.getElementById("output");    // Get the output div
+            const output = document.getElementById("output");   
 
             if (!word) {
                 output.textContent = "Please enter a word to search.";
@@ -104,13 +104,13 @@
                     const wordData = data[0]; // Assuming API returns a list, we take the first item
                     let result = `Word: ${wordData.word}\n`;
 
-                    // Phonetics and Audio (if available)
+                    // Audio 
                     const phonetics = wordData.phonetics;
                     if (phonetics && phonetics[0] && phonetics[0].audio) {
                         result += `Audio: ${phonetics[0].audio}\n\n`;
                     }
 
-                    // Meanings and Definitions
+                    // Meanings and or Definitions
                     const meanings = wordData.meanings;
                     if (meanings) {
                         meanings.forEach(meaning => {
@@ -141,7 +141,7 @@
                 });
         }
 
-        // Add event listener to the search button
+    
         document.getElementById("search-btn").addEventListener("click", search);
     </script>
 </body>
