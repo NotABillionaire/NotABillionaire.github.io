@@ -12,7 +12,7 @@
 <body>
     <h1>Dictionary Search</h1>
     <input type="text" id="word" placeholder="Enter a word">
-    <button onclick="search()">Search</button>
+    <button id="search-btn">Search</button>
     <pre id="output"></pre>
 
     <!-- PyScript Code -->
@@ -22,7 +22,7 @@ import requests
 # API URL
 URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 
-# Search function to fetch the word details
+# Function to handle the word search and API request
 def search():
     word = Element("word").value  # Get the word entered by the user
     output = Element("output")  # Reference the output element
@@ -32,7 +32,8 @@ def search():
         return
 
     try:
-        response = requests.get(URL + word)  # Make an API call to fetch the word details
+        # Make an API call to fetch the word details
+        response = requests.get(URL + word)
         
         # Log the response status code for debugging
         print(f"API Response Status Code: {response.status_code}")
@@ -48,9 +49,9 @@ def search():
         # Extract word and other details
         word_data = content[0]  # Assuming API returns a list, we take the first item
 
-        # Prepare the result
+        # Prepare the result to display
         result = f"Word: {word_data['word']}\n"
-        
+
         # Phonetics and Audio (if available)
         if "phonetics" in word_data:
             phonetics = word_data["phonetics"]
@@ -71,6 +72,28 @@ def search():
                 
                 result += f"{part_of_speech}: \n"
                 for definition in definitions:
+                    result += f"  - Definition: {definition['definition']}\n"
+                if synonyms:
+                    result += f"  - Synonyms: {synonyms}\n"
+                if antonyms:
+                    result += f"  - Antonyms: {antonyms}\n\n"
+        else:
+            result += f"No meanings found for '{word}'.\n"
+
+        # Write the result to the output section
+        output.write(result)
+
+    except Exception as e:
+        # Handle errors gracefully
+        output.write(f"An error occurred: {e}\n")
+        print(f"Error: {e}")
+
+# Set up event listener for the search button
+Element("search-btn").element.addEventListener("click", search)
+    </py-script>
+</body>
+</html>
+      for definition in definitions:
                     result += f"  - Definition: {definition['definition']}\n"
                 if synonyms:
                     result += f"  - Synonyms: {synonyms}\n"
