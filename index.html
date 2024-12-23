@@ -165,5 +165,29 @@
     
         document.getElementById("search-btn").addEventListener("click", search);
     </script>
+
+
+    // Linear search in JavaScript
+
+//check if a word exists in  "sowpods.txt" file
+function checkWordInScrabble(word) {
+    fetch("sowpods.txt")
+        .then(response => response.text())
+        .then(text => {
+            const scrabbleWords = text.split("\n"); // Split file into an array of words
+
+            for (let x of scrabbleWords) {
+                if (x === word.toUpperCase()) { // Match case (sowpods words are uppercase)
+                    console.log("It is a word in Scrabble.");
+                    return; // Exit once the word is found
+                }
+            }
+
+            console.log("It is not a word in Scrabble.");
+        })
+        .catch(error => {
+            console.error("Error loading or searching Scrabble words:", error.message);
+        });
+}
 </body>
 </html>
