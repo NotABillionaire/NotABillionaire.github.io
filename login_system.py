@@ -1,107 +1,73 @@
-#Thomas 
-#Login System
-#changed 29/9/2024
+from browser import document, html, window
 
-import Config #Imports my global variables
-import time
-import os, random
-from hashlib import sha256
-import linecache
+# Simulate the files with localStorage
+file = "user_data"
 
+# A utility function to get data from localStorage
+def get_data():
+    data = window.localStorage.getItem(file)
+    if not data:
+        return {}
+    return eval(data)
 
+# A utility function to save data to localStorage
+def save_data(data):
+    window.localStorage.setItem(file, str(data))
 
-#This will add the new file you created for generation
-import Cube_Generation
-
-file = "user.txt"
-
-#Check if the files exist
-if not os.path.exists("user.txt"):
-    open("user.txt", "w").close()
-
-if not os.path.exists("Hashed.txt"):
-    open("Hashed.txt", "w").close()
-
-#Login or signup
-def start():
-    while True:
-        L = input("Login OR Signup \n").lower()
-        if L == "signup":
-            print("Hello, welcome to Signup \n")
-            Signup1()
-            break
-        elif L == "login":
-            print("Hello and welcome to login")
-            login1()
-            break
-        else:
-            print("Please enter 'Login' or 'Signup'")
-
-#Code for signup
-def Signup1():
-    userfound = False
-    user = input("Enter username: ")
-    with open("user.txt", "r") as file:
-        for line in file:
-            line = line.rstrip("")
-            data = line.split(",")
-            if data[0] == user:  # Checks to see if the username is already in use
-                userfound = True
-                print("\nThis username is already taken. Try login\n")
-                start()
-                return
-    if not userfound:
-        user_id = str(len(open("user.txt").readlines()) + 1)  #Counts the number of lines in the file
-        print("This username is valid\n")
-        with open("user.txt", "a") as file:
-            file.write(user + ",")
-            file.write(user_id)
-            file.write("\n")
-        Next()
-
-#Create account
-def Next():
-    password = input("Enter a password: ")
-    user_id = str(len(open("Hashed.txt").readlines()) + 1)  #Adds one to the readlines because of the PLACEHOLDER
-    with open("Hashed.txt", "a") as file:
-        file.write(sha256(password.encode('utf-8')).hexdigest() + ",")  #Writes the hash to the file
-    print("\nPlease answer our security question: ")
-    fq = input("\nYour First Pet's Name? : ")
-    with open("Hashed.txt", "a") as file:
-        file.write(fq + ",")
-        file.write(user_id)
-        file.write("\n")
-    print("Please could you login now")
-    login1()
-
-#Login to the account
-def login1():
-    user2 = input("Enter username: ")
-    user_id = None
-    with open("user.txt") as file:
-        for line in file:
-            data = line.split(",")  #Splits the username and user_id
-            if data[0] == user2:
-                user_id = data[1].strip()
-                print("Username found")
-                break
-    if user_id:
-        psn = input("Enter password: ")
-        psn_hashed = sha256(psn.encode('utf-8')).hexdigest()  #Encodes the entered password
-        hashed_line = linecache.getline("Hashed.txt", int(user_id))
-        if psn_hashed in hashed_line:  #Uses the User_id to get the line number
-            print("Password found")
-            print("Hello", user2, "welcome to your account")
-            #Game code here
-            Config.sensitivity = float(input("please enter your preferred sensitivity (0 - 0.5)"))
-            Cube_Generation.main()
-        else:
-            print("Password not found")
-            start()
+# Main function to start login/signup process
+def start(event=None):
+    document["output"].clear()
+    L = document["login_signup"].value.lower()
+    if L == "signup":
+        Signup1()
+    elif L == "login":
+        login1()
     else:
-        print("Username not found")
-        print("You are starting again for security reasons")
-        start()
+        document["output"].text = "Please enter 'Login' or 'Signup'"
 
-start()
+# Code for Signup
+def Signup1():
+    document["output"].clear()
+    user = document["username"].value
+    data = get_data()
+
+    if user in data:
+        document["output"].text = "This username is already taken. Try login."
+        return
+
+    password = document["password"].value
+    # Hashing the password (simple simulation)
+    password_hashed = sha256(password.encode('utf-8')).hexdigest()
+    
+    # Store new user
+    data[user] = {
+        "password": password_hashed,
+        "security_question": document["security_question"].value
+    }
+    
+    save_data(data)
+    document["output"].text = "Account created successfully. Please login now."
+
+# Code for Login
+def login1():
+    document["output"].clear()
+    user = document["username"].value
+    password = document["password"].value
+    data = get_data()
+
+    if user not in data:
+        document["output"].text = "Username not found"
+        return
+
+    password_hashed = sha256(password.encode('utf-8')).hexdigest()
+
+    if data[user]["password"] == password_hashed:
+        document["output"].text = f"Hello {user}, welcome to your account.
+    else:
+        document["output"].text = "Incorrect password. Please try again."
+
+# Bind the start function to button click event
+document["start_button"].bind("click", start)
+
+
 
