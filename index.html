@@ -1,34 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-517BHJ9XQ0"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-517BHJ9XQ0');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login System</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.10.5/brython.min.js"></script>
+    <title>Tom's Amazing website</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.1/brython.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        main {
+            padding: 2rem;
+            text-align: center;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #333;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        #output, #cube-output {
+            white-space: pre-wrap;
+            text-align: left;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #eee;
+            border-radius: 5px;
+            min-height: 100px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        input {
+            padding: 10px;
+            margin-top: 10px;
+            width: 300px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body onload="brython()">
-    <h1>Login or Signup</h1>
+    <header>
+        <h1>Tom's Website</h1>
+    </header>
 
-    <div>
-        <label for="login_signup">Enter 'Signup' or 'Login': </label>
-        <input type="text" id="login_signup">
-    </div>
-    <div>
-        <label for="username">Username: </label>
-        <input type="text" id="username">
-    </div>
-    <div>
-        <label for="password">Password: </label>
-        <input type="password" id="password">
-    </div>
-    <div id="security_question_container" style="display: none;">
-        <label for="security_question">Security Question (First Pet's Name): </label>
-        <input type="text" id="security_question">
-    </div>
-    <button id="start_button">Submit</button>
+    <main>
+        <section>
+            <h2>Dictionary and Scrabble Check</h2>
+            <input type="text" id="word" placeholder="Enter a word">
+            <button id="search-btn">Search</button>
+            <div id="output"></div>
+        </section>
 
-    <p id="output"></p>
+        <section>
+            <h2>Rubik's Cube Generator</h2>
+            <button id="generate-cube-btn">Generate Cube</button>
+            <div id="cube-output"></div>
+        </section>
+    </main>
 
-    <script type="text/python" src="login_system.py"></script>
+    <footer>
+        <p>&copy; 2024 Tom's Website. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // JavaScript remains for dictionary and Scrabble check
+        const URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+
+        function search() {
+            const word = document.getElementById("word").value;
+            const output = document.getElementById("output");
+
+            if (!word) {
+                output.textContent = "Please enter a word to search.";
+                return;
+            }
+
+            checkWordInScrabble(word, (isScrabbleWord) => {
+                if (isScrabbleWord) {
+                    output.textContent = `'${word}' is a word in Scrabble.\n\n`;
+                } else {
+                    output.textContent = `'${word}' is not a word in Scrabble.\n\n`;
+                }
+
+                fetch(URL + word)
+                    .then(response => {
+                        if (!response.ok) {
+                            output.textContent += `Error: Unable to fetch data for '${word}' (Status code: ${response.status}). Please try again.`;
+                            return;
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const wordData = data[0];
+                        let result = `Word: ${wordData.word}\n`;
+
+                        const phonetics = wordData.phonetics;
+                        if (phonetics && phonetics[0] && phonetics[0].audio) {
+                            result += `Audio: ${phonetics[0].audio}\n\n`;
+                        }
+
+                        const meanings = wordData.meanings;
+                        if (meanings) {
+                            meanings.forEach(meaning => {
+                                result += `${meaning.partOfSpeech}:\n`;
+
+                                meaning.definitions.forEach(definition => {
+                                    result += ` - Definition: ${definition.definition}\n`;
+                                });
+
+                                if (meaning.synonyms.length > 0) {
+                                    result += ` - Synonyms: ${meaning.synonyms.join(", ")}\n`;
+                                }
+
+                                if (meaning.antonyms.length > 0) {
+                                    result += ` - Antonyms: ${meaning.antonyms.join(", ")}\n`;
+                                }
+                                result += "\n";
+                            });
+                        } else {
+                            result += `No meanings found for '${word}'.\n`;
+                        }
+
+                        output.textContent += result;
+                    })
+                    .catch(error => {
+                        output.textContent = `An error occurred: ${error.message}`;
+                    });
+            });
+        }
+
+        function checkWordInScrabble(word, callback) {
+            fetch("sowpods.txt")
+                .then(response => response.text())
+                .then(text => {
+                    const scrabbleWords = text.split("\n");
+                    const isScrabbleWord = scrabbleWords.includes(word.toUpperCase());
+                    callback(isScrabbleWord);
+                })
+                .catch(error => {
+                    console.error("Error loading or searching Scrabble words:", error.message);
+                    callback(false);
+                });
+        }
+
+        document.getElementById("search-btn").addEventListener("click", search);
+    </script>
+
+    <script type="text/python">
+        from browser import document
+
+        # Python logic for Rubik's Cube generation
+        def generate_cube(event):
+            cube = [
+                ["R", "R", "R"],
+                ["G", "G", "G"],
+                ["B", "B", "B"]
+            ]
+            cube_output = document["cube-output"]
+            cube_output.text = "Generated Cube:\n"
+            cube_output.text += "\n".join([" ".join(row) for row in cube])
+
+        # Bind the button click to the function
+        document["generate-cube-btn"].bind("click", generate_cube)
+    </script>
 </body>
 </html>
