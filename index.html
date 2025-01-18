@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
+    
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-517BHJ9XQ0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-517BHJ9XQ0');
+</script>
+    
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-517BHJ9XQ0"></script>
     <script>
@@ -12,102 +23,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tom's Amazing website</title>
-    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.1/brython.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-        }
-        main {
-            padding: 2rem;
-            text-align: center;
-        }
-        footer {
-            text-align: center;
-            padding: 1rem;
-            background-color: #333;
-            color: white;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-        #output, #cube-output {
-            white-space: pre-wrap;
-            text-align: left;
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #eee;
-            border-radius: 5px;
-            min-height: 100px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        input {
-            padding: 10px;
-            margin-top: 10px;
-            width: 300px;
-            font-size: 16px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
-</head>
-<body onload="brython()">
-    <header>
-        <h1>Tom's Website</h1>
-    </header>
-
-    <main>
-        <section>
-            <h2>Dictionary and Scrabble Check</h2>
-            <input type="text" id="word" placeholder="Enter a word">
-            <button id="search-btn">Search</button>
-            <div id="output"></div>
-        </section>
-
-        <section>
-            <h2>Rubik's Cube Generator</h2>
-            <button id="generate-cube-btn">Generate Cube</button>
-            <div id="cube-output"></div>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2024 Tom's Website. All Rights Reserved.</p>
-    </footer>
-
-    <script>
-        // JavaScript remains for dictionary and Scrabble check
+@@ -102,7 +89,7 @@ <h1>Tom's Website</h1>
+        // URL of the dictionary API
         const URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
 
+        // Function to handle the search
+        //  handles the search
         function search() {
-            const word = document.getElementById("word").value;
-            const output = document.getElementById("output");
-
-            if (!word) {
-                output.textContent = "Please enter a word to search.";
+            const word = document.getElementById("word").value;  // Get the entered word
+            const output = document.getElementById("output");   
+@@ -112,82 +99,82 @@ <h1>Tom's Website</h1>
                 return;
             }
 
+            // Make the API request
+            fetch(URL + word)
+                .then(response => {
+                    if (!response.ok) {
+                        output.textContent = `Error: Unable to fetch data for '${word}' (Status code: ${response.status}). Please try again.`;
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const wordData = data[0]; // Assuming API returns a list, we take the first item
+                    let result = `Word: ${wordData.word}\n`;
+                    // Audio 
+                    const phonetics = wordData.phonetics;
+                    if (phonetics && phonetics[0] && phonetics[0].audio) {
+                        result += `Audio: ${phonetics[0].audio}\n\n`;
+                    }
+                    // Meanings and or Definitions
+                    const meanings = wordData.meanings;
+                    if (meanings) {
+                        meanings.forEach(meaning => {
+                            result += `${meaning.partOfSpeech}:\n`;
+            // Check if the word exists in Scrabble
             checkWordInScrabble(word, (isScrabbleWord) => {
                 if (isScrabbleWord) {
                     output.textContent = `'${word}' is a word in Scrabble.\n\n`;
@@ -115,6 +66,9 @@
                     output.textContent = `'${word}' is not a word in Scrabble.\n\n`;
                 }
 
+                            meaning.definitions.forEach(definition => {
+                                result += ` - Definition: ${definition.definition}\n`;
+                // Make the API request to fetch additional data
                 fetch(URL + word)
                     .then(response => {
                         if (!response.ok) {
@@ -124,27 +78,24 @@
                         return response.json();
                     })
                     .then(data => {
-                        const wordData = data[0];
+                        const wordData = data[0]; // Assuming API returns a list, we take the first item
                         let result = `Word: ${wordData.word}\n`;
-
+                        // Audio 
                         const phonetics = wordData.phonetics;
                         if (phonetics && phonetics[0] && phonetics[0].audio) {
                             result += `Audio: ${phonetics[0].audio}\n\n`;
                         }
-
+                        // Meanings and Definitions
                         const meanings = wordData.meanings;
                         if (meanings) {
                             meanings.forEach(meaning => {
                                 result += `${meaning.partOfSpeech}:\n`;
-
                                 meaning.definitions.forEach(definition => {
                                     result += ` - Definition: ${definition.definition}\n`;
                                 });
-
                                 if (meaning.synonyms.length > 0) {
                                     result += ` - Synonyms: ${meaning.synonyms.join(", ")}\n`;
                                 }
-
                                 if (meaning.antonyms.length > 0) {
                                     result += ` - Antonyms: ${meaning.antonyms.join(", ")}\n`;
                                 }
@@ -153,7 +104,7 @@
                         } else {
                             result += `No meanings found for '${word}'.\n`;
                         }
-
+                        // Display the result
                         output.textContent += result;
                     })
                     .catch(error => {
@@ -162,39 +113,57 @@
             });
         }
 
+                            if (meaning.synonyms.length > 0) {
+                                result += ` - Synonyms: ${meaning.synonyms.join(", ")}\n`;
+                            }
+                            if (meaning.antonyms.length > 0) {
+                                result += ` - Antonyms: ${meaning.antonyms.join(", ")}\n`;
+                            }
+                            result += "\n";
+                        });
+                    } else {
+                        result += `No meanings found for '${word}'.\n`;
+                    }
+                    // Display the result
+                    output.textContent = result;
+        //  checks if a word exists in the  file
         function checkWordInScrabble(word, callback) {
             fetch("sowpods.txt")
                 .then(response => response.text())
                 .then(text => {
-                    const scrabbleWords = text.split("\n");
-                    const isScrabbleWord = scrabbleWords.includes(word.toUpperCase());
+                    const scrabbleWords = text.split("\n"); // Split file into an array of words
+                    const isScrabbleWord = scrabbleWords.includes(word.toUpperCase()); // Check if the word is in the list
                     callback(isScrabbleWord);
                 })
                 .catch(error => {
+                    output.textContent = `An error occurred: ${error.message}`;
                     console.error("Error loading or searching Scrabble words:", error.message);
-                    callback(false);
+                    callback(false); // Assume false on error
                 });
         }
 
+    
+        // Attaches listener to the button
         document.getElementById("search-btn").addEventListener("click", search);
     </script>
-
-    <script type="text/python">
-        from browser import document
-
-        # Python logic for Rubik's Cube generation
-        def generate_cube(event):
-            cube = [
-                ["R", "R", "R"],
-                ["G", "G", "G"],
-                ["B", "B", "B"]
-            ]
-            cube_output = document["cube-output"]
-            cube_output.text = "Generated Cube:\n"
-            cube_output.text += "\n".join([" ".join(row) for row in cube])
-
-        # Bind the button click to the function
-        document["generate-cube-btn"].bind("click", generate_cube)
-    </script>
+    // Linear search in JavaScript
+//check if a word exists in  "sowpods.txt" file
+function checkWordInScrabble(word) {
+    fetch("sowpods.txt")
+        .then(response => response.text())
+        .then(text => {
+            const scrabbleWords = text.split("\n"); // Split file into an array of words
+            for (let x of scrabbleWords) {
+                if (x === word.toUpperCase()) { // Match case (sowpods words are uppercase)
+                    console.log("It is a word in Scrabble.");
+                    return; // Exit once the word is found
+                }
+            }
+            console.log("It is not a word in Scrabble.");
+        })
+        .catch(error => {
+            console.error("Error loading or searching Scrabble words:", error.message);
+        });
+}
 </body>
 </html>
