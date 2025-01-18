@@ -12,6 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tom's Amazing website</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.1/brython.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,7 +40,7 @@
             bottom: 0;
             width: 100%;
         }
-        #output {
+        #output, #cube-output {
             white-space: pre-wrap;
             text-align: left;
             margin-top: 20px;
@@ -70,15 +71,24 @@
         }
     </style>
 </head>
-<body>
+<body onload="brython()">
     <header>
         <h1>Tom's Website</h1>
     </header>
 
     <main>
-        <input type="text" id="word" placeholder="Enter a word">
-        <button id="search-btn">Search</button>
-        <div id="output"></div>
+        <section>
+            <h2>Dictionary and Scrabble Check</h2>
+            <input type="text" id="word" placeholder="Enter a word">
+            <button id="search-btn">Search</button>
+            <div id="output"></div>
+        </section>
+
+        <section>
+            <h2>Rubik's Cube Generator</h2>
+            <button id="generate-cube-btn">Generate Cube</button>
+            <div id="cube-output"></div>
+        </section>
     </main>
 
     <footer>
@@ -86,20 +96,18 @@
     </footer>
 
     <script>
-        // URL of the dictionary API
+        // JavaScript remains for dictionary and Scrabble check
         const URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
 
-        //  handles the search
         function search() {
-            const word = document.getElementById("word").value;  // Get the entered word
-            const output = document.getElementById("output");   
+            const word = document.getElementById("word").value;
+            const output = document.getElementById("output");
 
             if (!word) {
                 output.textContent = "Please enter a word to search.";
                 return;
             }
 
-            // Check if the word exists in Scrabble
             checkWordInScrabble(word, (isScrabbleWord) => {
                 if (isScrabbleWord) {
                     output.textContent = `'${word}' is a word in Scrabble.\n\n`;
@@ -107,7 +115,6 @@
                     output.textContent = `'${word}' is not a word in Scrabble.\n\n`;
                 }
 
-                // Make the API request to fetch additional data
                 fetch(URL + word)
                     .then(response => {
                         if (!response.ok) {
@@ -117,16 +124,14 @@
                         return response.json();
                     })
                     .then(data => {
-                        const wordData = data[0]; // Assuming API returns a list, we take the first item
+                        const wordData = data[0];
                         let result = `Word: ${wordData.word}\n`;
 
-                        // Audio 
                         const phonetics = wordData.phonetics;
                         if (phonetics && phonetics[0] && phonetics[0].audio) {
                             result += `Audio: ${phonetics[0].audio}\n\n`;
                         }
 
-                        // Meanings and Definitions
                         const meanings = wordData.meanings;
                         if (meanings) {
                             meanings.forEach(meaning => {
@@ -149,7 +154,6 @@
                             result += `No meanings found for '${word}'.\n`;
                         }
 
-                        // Display the result
                         output.textContent += result;
                     })
                     .catch(error => {
@@ -158,23 +162,40 @@
             });
         }
 
-        //  checks if a word exists in the  file
         function checkWordInScrabble(word, callback) {
             fetch("sowpods.txt")
                 .then(response => response.text())
                 .then(text => {
-                    const scrabbleWords = text.split("\n"); // Split file into an array of words
-                    const isScrabbleWord = scrabbleWords.includes(word.toUpperCase()); // Check if the word is in the list
+                    const scrabbleWords = text.split("\n");
+                    const isScrabbleWord = scrabbleWords.includes(word.toUpperCase());
                     callback(isScrabbleWord);
                 })
                 .catch(error => {
                     console.error("Error loading or searching Scrabble words:", error.message);
-                    callback(false); // Assume false on error
+                    callback(false);
                 });
         }
 
-        // Attaches listener to the button
         document.getElementById("search-btn").addEventListener("click", search);
+    </script>
+
+    <script type="text/python">
+        from browser import document
+
+        # Python logic for Rubik's Cube generation
+        def generate_cube(event):
+            cube = [
+                ["R", "R", "R"],
+                ["G", "G", "G"],
+                ["B", "B", "B"]
+            ]
+            cube_output = document["cube-output"]
+            cube_output.text = "Generated Cube:\n"
+            cube_output.text += "\n".join([" ".join(row) for row in cube])
+
+        # Bind the button click to the function
+        document["generate-cube-btn"].bind("click", generate_cube)
     </script>
 </body>
 </html>
+
