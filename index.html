@@ -7,8 +7,12 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.10.5/brython.min.js"></script>
 </head>
 <body onload="brython()">
-    <h1>Login</h1>
-    
+    <h1>Login or Signup</h1>
+
+    <div>
+        <label for="login_signup">Enter 'Signup' or 'Login': </label>
+        <input type="text" id="login_signup">
+    </div>
     <div>
         <label for="username">Username: </label>
         <input type="text" id="username">
@@ -17,9 +21,13 @@
         <label for="password">Password: </label>
         <input type="password" id="password">
     </div>
-    <button id="login_button">Login</button>
-    
-    <p id="status"></p>
+    <div id="security_question_container" style="display: none;">
+        <label for="security_question">Security Question (First Pet's Name): </label>
+        <input type="text" id="security_question">
+    </div>
+    <button id="start_button">Submit</button>
+
+    <p id="output"></p>
 
     <script type="text/python" src="login_system.py"></script>
 </body>
