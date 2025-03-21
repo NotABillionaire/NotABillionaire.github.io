@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubik's Cube Game</title>
+    <link rel="stylesheet" href="rubiks.css">
+    <script>
+        // Redirect to index.html if the user isn't authenticated
+        if (localStorage.getItem("authenticated") !== "true") {
+            window.location.href = "index.html";
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Rubik's Cube Game</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Dictionary</a></li>
+                <li><a href="rubiks.html">Rubik's Cube Game</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <canvas id="cubeCanvas" width="600" height="600"></canvas>
+    </main>
+    <footer>
+        <p>&copy; 2024 Tom's Website. All Rights Reserved.</p>
+    </footer>
+    <script src="rubiks.js"></script>
+</body>
+</html>
