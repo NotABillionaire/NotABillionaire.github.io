@@ -1,33 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rubik's Cube Game</title>
-    <link rel="stylesheet" href="rubiks.css">
-    <script>
-        // Redirect to index.html 
-        if (localStorage.getItem("authenticated") !== "true") {
-            window.location.href = "index.html";
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rubik's Cube Game</title>
+  <link rel="stylesheet" href="rubiks.css">
+  <script>
+    // Helper: Get query parameter value by name
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    // On load, check for a valid token.
+    const urlToken = getQueryParam("token");
+    const storedToken = sessionStorage.getItem("authToken");
+
+    if (urlToken && storedToken && urlToken === storedToken) {
+      // Valid token: remove it so it can’t be reused.
+      sessionStorage.removeItem("authToken");
+    } else {
+      // No valid token: redirect to login (index.html)
+      window.location.href = "index.html";
+    }
+  </script>
 </head>
 <body>
-    <header>
-        <h1>Rubik's Cube Game</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Dictionary</a></li>
-                <li><a href="rubiks.html">Rubik's Cube Game</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <canvas id="cubeCanvas" width="600" height="600"></canvas>
-    </main>
-    <footer>
-        <p>&copy; 2024 Tom's Website. All Rights Reserved.</p>
-    </footer>
-    <script src="rubiks.js"></script>
+  <header>
+    <h1>Rubik's Cube Game</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Dictionary</a></li>
+        <li><a href="rubiks.html">Rubik's Cube Game</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <canvas id="cubeCanvas" width="600" height="600"></canvas>
+  </main>
+  <footer>
+    <p>&copy; 2024 Tom's Website. All Rights Reserved.</p>
+  </footer>
+  <script src="rubiks.js"></script>
 </body>
 </html>
