@@ -11,7 +11,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tom's Amazing website</title>
+    <title>Tom's Amazing Website</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -26,6 +26,14 @@
             padding: 1rem;
             text-align: center;
         }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin-right: 10px;
+        }
         main {
             padding: 2rem;
             text-align: center;
@@ -38,6 +46,17 @@
             position: fixed;
             bottom: 0;
             width: 100%;
+        }
+        /* Login container styling */
+        #loginContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        /* Hide main content until logged in */
+        #mainContent {
+            display: none;
         }
         #output {
             white-space: pre-wrap;
@@ -73,26 +92,60 @@
 <body>
     <header>
         <h1>Tom's Website</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Dictionary</a></li>
+                <li><a href="rubiks.html">Rubik's Cube Game</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <main>
-        <input type="text" id="word" placeholder="Enter a word">
-        <button id="search-btn">Search</button>
-        <div id="output"></div>
-    </main>
+    <!-- Login Container -->
+    <div id="loginContainer">
+        <h2>Please enter the password to access the website</h2>
+        <input type="password" id="passwordInput" placeholder="Enter Password">
+        <button id="loginBtn">Login</button>
+        <p id="error" style="color: red;"></p>
+    </div>
+
+    <!-- Main Content (hidden until logged in) -->
+    <div id="mainContent">
+        <main>
+            <input type="text" id="word" placeholder="Enter a word">
+            <button id="search-btn">Search</button>
+            <div id="output"></div>
+        </main>
+    </div>
 
     <footer>
         <p>&copy; 2024 Tom's Website. All Rights Reserved.</p>
     </footer>
 
     <script>
-        // URL of the dictionary API
+        // Check if user is already authenticated
+        if (localStorage.getItem("authenticated") === "true") {
+            document.getElementById("loginContainer").style.display = "none";
+            document.getElementById("mainContent").style.display = "block";
+        }
+
+        // Login functionality
+        document.getElementById("loginBtn").addEventListener("click", function() {
+            const password = document.getElementById("passwordInput").value;
+            if (password === "1234") {
+                localStorage.setItem("authenticated", "true");
+                document.getElementById("loginContainer").style.display = "none";
+                document.getElementById("mainContent").style.display = "block";
+            } else {
+                document.getElementById("error").textContent = "Incorrect password.";
+            }
+        });
+
+        // Dictionary/Search functionality
         const URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
 
-        //  handles the search
         function search() {
-            const word = document.getElementById("word").value;  // Get the entered word
-            const output = document.getElementById("output");   
+            const word = document.getElementById("word").value;
+            const output = document.getElementById("output");
 
             if (!word) {
                 output.textContent = "Please enter a word to search.";
@@ -107,7 +160,7 @@
                     output.textContent = `'${word}' is not a word in Scrabble.\n\n`;
                 }
 
-                // Make the API request to fetch additional data
+                // Fetch additional data from the dictionary API
                 fetch(URL + word)
                     .then(response => {
                         if (!response.ok) {
@@ -117,10 +170,11 @@
                         return response.json();
                     })
                     .then(data => {
-                        const wordData = data[0]; // Assuming API returns a list, we take the first item
+                        if (!data) return;
+                        const wordData = data[0]; // Taking the first result
                         let result = `Word: ${wordData.word}\n`;
 
-                        // Audio 
+                        // Audio URL (if available)
                         const phonetics = wordData.phonetics;
                         if (phonetics && phonetics[0] && phonetics[0].audio) {
                             result += `Audio: ${phonetics[0].audio}\n\n`;
@@ -131,16 +185,13 @@
                         if (meanings) {
                             meanings.forEach(meaning => {
                                 result += `${meaning.partOfSpeech}:\n`;
-
                                 meaning.definitions.forEach(definition => {
                                     result += ` - Definition: ${definition.definition}\n`;
                                 });
-
-                                if (meaning.synonyms.length > 0) {
+                                if (meaning.synonyms && meaning.synonyms.length > 0) {
                                     result += ` - Synonyms: ${meaning.synonyms.join(", ")}\n`;
                                 }
-
-                                if (meaning.antonyms.length > 0) {
+                                if (meaning.antonyms && meaning.antonyms.length > 0) {
                                     result += ` - Antonyms: ${meaning.antonyms.join(", ")}\n`;
                                 }
                                 result += "\n";
@@ -158,23 +209,24 @@
             });
         }
 
-        //  checks if a word exists in the  file
+        // Checks if a word exists in the Scrabble word list (sowpods.txt)
         function checkWordInScrabble(word, callback) {
             fetch("sowpods.txt")
                 .then(response => response.text())
                 .then(text => {
-                    const scrabbleWords = text.split("\n"); // Split file into an array of words
-                    const isScrabbleWord = scrabbleWords.includes(word.toUpperCase()); // Check if the word is in the list
+                    const scrabbleWords = text.split("\n");
+                    const isScrabbleWord = scrabbleWords.includes(word.toUpperCase());
                     callback(isScrabbleWord);
                 })
                 .catch(error => {
                     console.error("Error loading or searching Scrabble words:", error.message);
-                    callback(false); // Assume false on error
+                    callback(false);
                 });
         }
 
-        // Attaches listener to the button
+        // Attach event listener to the search button
         document.getElementById("search-btn").addEventListener("click", search);
     </script>
 </body>
 </html>
+
